@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WTDI Setup</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>What to do instead!</h1>
+        <div class="nav">
+            <div class="nav-item active" data-section="websites-section">Websites</div>
+            <div class="nav-item" data-section="activities-section">Activities</div>
+            <div class="nav-item" data-section="settings-section">Settings</div>
+        </div>
+        <div id="content">
+            <div id="websites-section" class="section visible">
+                <div class="websites"></div>
+                <button class="add-item add-website">
+                    Add website
+                </button>
+            </div>
+            <div id="activities-section" class="section">
+                <div class="items"></div>
+                <button class="add-item add-activity">
+                    Add item
+                </button>
+            </div>
+            <div id="settings-section">
+                <div class="centered-input">
+                    <input type="number" value="60" min="0" class="countdown" />
+                    <p>Time to wait until you can access websites</p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</body>
+<script src="options.js"></script>
+
+</html>

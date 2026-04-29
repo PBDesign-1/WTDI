@@ -1,0 +1,41 @@
+{
+    "manifest_version": 3,
+    "name": "WTDI",
+    "version": "1.0.0",
+    "description": "...",
+    "options_page": "options.html",
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ],
+    "content_scripts": [
+        {
+            "js": [
+                "scripts/recommend.js"
+            ],
+            "matches": ["<all_urls>"]
+        },
+        {
+            "js": [
+                "scripts/yt_music_video.js"
+            ],
+            "matches": [
+                "https://music.youtube.com/*"
+            ]
+        }
+    ],
+    "permissions": [
+        "storage"
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "data.json",
+                "assets/trash.png"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
+}
