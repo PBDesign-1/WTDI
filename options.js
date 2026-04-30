@@ -1,27 +1,69 @@
 const addActivityButton = document.querySelector(".add-activity");
 const addWebsiteButton = document.querySelector(".add-website");
+const countdownElement = document.querySelector(".countdown");
 
-const timeToUnlockElement = document.querySelector(".countdown");
 
-loadActivities()
-loadWebsites()
-loadCountdown()
+// Inital load of content from storage or rerender them
+function rerender() {
+    loadActivities()
+    loadWebsites()
+    loadCountdown()
+}
 
+
+
+// Load countdown time fromstorage and load into input
 function loadCountdown() {
     chrome.storage.local.get(["countdown"]).then((storage) => {
         const countdown = parseInt(storage.countdown);
 
         if (countdown) {
-            timeToUnlockElement.value = countdown;
+            countdown.value = countdown;
         }
     })
 }
 
+// Load activities from storage and render them
+function loadActivities() {
+    chrome.storage.local.get(["activities"], (storage) => {
+        const itemContainer = document.querySelector(".items");
+        itemContainer.innerHTML = "";
+        const activities = storage.activities;
 
-function createItem(id, innerHtml, deleteOp) {
+        activities.forEach(element => {
+            const name = element.name + "";
+            const id = element.id;
+
+            const child = createItem("activities", id, name, () => deleteItem("activities", id))
+
+            itemContainer.appendChild(child);
+        });
+    })
+}
+
+// Load website urls from storage and render them
+function loadWebsites() {
+    chrome.storage.local.get(["websites"], (storage) => {
+        const itemContainer = document.querySelector(".websites");
+        itemContainer.innerHTML = "";
+        const websites = storage.websites;
+
+        websites.forEach(element => {
+            const url = element.url + "";
+            const id = element.id
+
+            const child = createItem("websites", id, url, () => deleteItem("websites", id))
+
+            itemContainer.appendChild(child);
+        });
+    })
+}
+
+// Create items (websites or activities)
+function createItem(scope, id, innerHtml, deleteOp) {
     const itemElement = document.createElement("div")
-    itemElement.className = "item";
-    itemElement.id = "item-" + id;
+    itemElement.classList.add("item", scope + "-item");
+    itemElement.id = `${scope}-${id}`;
 
     const nameElement = document.createElement("p");
     nameElement.innerHTML = innerHtml;
@@ -40,67 +82,24 @@ function createItem(id, innerHtml, deleteOp) {
     return itemElement;
 }
 
-function loadActivities() {
-    chrome.storage.local.get(["items"], (storage) => {
-        const itemContainer = document.querySelector(".items");
-        itemContainer.innerHTML = "";
-        const items = storage.items;
+// Delete items (websites or activities)
+async function deleteItem(scope, id) {
+    const element = document.getElementById(`${scope}-${id}`);
+    const storage = await chrome.storage.local.get([scope])
 
-        items.forEach(element => {
-            const name = element.name + "";
+    console.log(element, storage, scope, id);
 
-            const child = createItem(name, name, () => deleteItem(name))
-
-            itemContainer.appendChild(child);
-        });
+    await chrome.storage.local.set({
+        [scope]: Array.isArray(storage[scope]) ? storage[scope].filter(i => i.id != id) : []
     })
+
+    rerender()
 }
-
-function loadWebsites() {
-    chrome.storage.local.get(["items", "websites"], (storage) => {
-        console.log(storage.websites)
-        const itemContainer = document.querySelector(".websites");
-        itemContainer.innerHTML = "";
-        const items = storage.websites;
-
-        items.forEach(element => {
-            const name = element.url + "";
-
-            const child = createItem(name, name, () => deleteWebsite(name))
-
-            itemContainer.appendChild(child);
-        });
-    })
-}
-
 function destroyPopup() {
     const popup = document.querySelector(".popup");
     if (popup) {
         popup.remove()
     }
-}
-
-async function deleteItem(name) {
-    console.log(name)
-    const element = document.getElementById("item-" + name);
-    const { items } = await chrome.storage.local.get(["items"])
-
-    await chrome.storage.local.set({
-        items: Array.isArray(items) ? items.filter(i => i.name != name) : []
-    })
-
-    loadActivities()
-}
-
-async function deleteWebsite(url) {
-    const element = document.getElementById("item-" + url);
-    const { websites } = await chrome.storage.local.get(["websites"])
-
-    await chrome.storage.local.set({
-        websites: Array.isArray(websites) ? websites.filter(i => i.url != url) : []
-    })
-
-    loadWebsites()
 }
 
 
@@ -148,15 +147,15 @@ addActivityButton.addEventListener("click", () => {
         const activity = document.querySelector(".popup-input");
 
         if (activity) {
-            chrome.storage.local.get(["items"]).then(async (storage) => {
-                const items = Array.isArray(storage.items) ? storage.items : [];
-                console.log(items)
+            chrome.storage.local.get(["activities"]).then(async (storage) => {
+                const activities = Array.isArray(storage.activities) ? storage.activities : [];
                 await chrome.storage.local.set({
-                    items: [
+                    activities: [
                         {
+                            id: crypto.randomUUID(),
                             name: activity.value
                         },
-                        ...items
+                        ...activities
                     ]
                 })
                 loadActivities()
@@ -177,24 +176,39 @@ addWebsiteButton.addEventListener("click", () => {
             </div>
         </div>
     `, () => {
-        const websiteUrl = document.querySelector(".popup-input");
+        let websiteUrlInput = document.querySelector(".popup-input")?.value;
 
-        if (websiteUrl) {
-            chrome.storage.local.get(["websites"]).then(async (storage) => {
-                const websites = Array.isArray(storage.websites) ? storage.websites : [];
-                await chrome.storage.local.set({
-                    websites: [
-                        {
-                            url: websiteUrl.value
-                        },
-                        ...websites
-                    ]
+        if (websiteUrlInput) {
+            if(!websiteUrlInput.startsWith("http")){
+                websiteUrlInput = "https://" + websiteUrlInput;
+            }
+
+            try {
+                const websiteUri = encodeURI(websiteUrlInput)
+                const websiteUrl = new URL(websiteUri);
+
+
+                chrome.storage.local.get(["websites"]).then(async (storage) => {
+                    const websites = Array.isArray(storage.websites) ? storage.websites : [];
+                    await chrome.storage.local.set({
+                        websites: [
+                            {
+                                id: crypto.randomUUID(),
+                                url: websiteUrl.host
+                            },
+                            ...websites
+                        ]
+                    })
+                    loadWebsites()
+                    destroyPopup()
                 })
-                loadWebsites()
-                destroyPopup()
-            })
+            } catch (err) {
+
+            }
 
         }
+
+
     })
 });
 
@@ -213,7 +227,6 @@ navItems.forEach(n => {
         n.classList.add("active")
 
         sections.forEach(s => {
-            console.log(s.id, n.dataset.section)
             if (s.id == n.dataset.section) {
                 s.classList.add("visible")
             } else {
@@ -223,20 +236,12 @@ navItems.forEach(n => {
     });
 })
 
-const items = chrome.storage.local.get(["items"]).then((storage) => {
-    console.log(storage)
-})
 
-
-timeToUnlockElement.addEventListener("change", (e) => {
+countdownElement.addEventListener("change", (e) => {
     const input = e.target;
-
-    console.log(input)
 
     if (!input) return;
     const time = Number.parseInt(input.value);
-
-    console.log(time)
 
     if (time != NaN) {
         chrome.storage.local.set({
@@ -244,3 +249,7 @@ timeToUnlockElement.addEventListener("change", (e) => {
         })
     }
 });
+
+
+
+rerender()
