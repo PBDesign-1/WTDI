@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "WTDI",
     "version": "1.0.1",
-    "description": "WTDI, short for What To Do Instead, is an chrome extension that helps you focus and makes time-wasting websites less accessible.",
+    "description": "WTDI, short for What To Do Instead, is a chrome extension that helps you focus and makes time-wasting websites less accessible.",
     "options_page": "options.html",
     "host_permissions": [
         "http://*/*",
