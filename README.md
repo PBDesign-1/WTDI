@@ -1,5 +1,9 @@
 # WTDI - Productivity Chrome Extension
-WTDI, short for What To Do Instead, is a chrome extension that helps you focus. Every time you visit a website you specified as blocked the site gets overlayed by a popup. You have to wait for a certain amount of time until you are allowed to access the site. To make it even harder you are not allowed to switch the window or site until the timer has finished. You can specify alternative activities in the options, which will then be displayed on the popup..
+<a href="https://chromewebstore.google.com/detail/wtdi/hfkcnllohpnkpgdecmcbaaalmkkmnpgl"><img width="206" height="58" alt="206x58-chrome-web-bcb82d15b2486" src="https://github.com/user-attachments/assets/33f3278d-b73d-49d9-a223-b432d5f79871" /></a>
+
+<br />
+
+WTDI, short for What To Do Instead, is a chrome extension that helps you focus. Every time you visit a website you specified as blocked the site gets overlayed by a popup. You have to wait for a certain amount of time until you are allowed to access the site. To make it even harder you are not allowed to switch the window or site until the timer has finished. You can specify alternative activities in the options, which will then be displayed on the popup.
 
 ## Application
 ### Setup
